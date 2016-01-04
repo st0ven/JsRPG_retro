@@ -41,7 +41,8 @@
 				"module/map",
 				// options in object form
 				"options/gameopts",
-				"options/tileopts"
+				"options/tileopts",
+				"options/textures"
 			], 
 			importComplete 
 		);
