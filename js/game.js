@@ -7,9 +7,9 @@ function Game()
 
 	var self = this,
 	    raf = requestAnimationFrame ||
-		     webkitRequestAnimationFrame ||
-		     mozRequestAnimationFrame || 
-		     msRequestAnimationFrame || null;
+		  webkitRequestAnimationFrame ||
+		  mozRequestAnimationFrame || 
+		  msRequestAnimationFrame || null;
 
 
 	this.canvas = new Canvas();
@@ -18,7 +18,7 @@ function Game()
 	this.loop = new function()
 	{
 
-		// private
+		// boolean pause flag
 		var pause = false,
 		// timing properties
 		    timing = {
@@ -27,7 +27,28 @@ function Game()
 			latest: Date.now(),
 			tick: 0
 
-		    };
+		    },
+		// define main game loop
+		    GameLoop = function()
+		    {
+
+			// calculate timing of current loop
+			timing.tick = Date.now() - timing.latest;
+			timing.latest = Date.now();
+
+			this.logic();
+
+			this.render();
+
+			// iterate loop if no pause state
+			if( !pause )
+			{
+				
+				raf( GameLoop.bind( this ) );
+
+			}
+
+		    }.bind( this );
 
 
 		this.logic = function(){
@@ -47,55 +68,32 @@ function Game()
 		this.render = function(){};
 
 
-		// define main game loop
-		var GameLoop = function()
-		{
-
-			// calculate timing of current loop
-			timing.tick = Date.now() - timing.latest;
-			timing.latest = Date.now();
-
-
-			this.logic();
-
-
-			this.render();
-
-
-			// iterate loop if no pause state
-			if( !pause )
-			{
-				
-				raf( GameLoop.bind( this ) );
-
-			}
-
-		}.bind( this );
-
-
 		// prototype methods
 		this.__proto__ = {
+
 			begin: GameLoop,
+
 			fps: function()
 			{ 
 				return Math.round( 1 / ( this.timing.tick / 1000 ) ); 
 			},
+
 			pause: function()
 			{ 
 				pause = true; 
 			},
+
 			resume: function()
 			{ 
 				pause = false; 
 			},
+
 			timing: timing
+
 		};
 
 
 	};
-
-
-	this.math = new ExtendedMath();
 
 
 	// game prototype methods

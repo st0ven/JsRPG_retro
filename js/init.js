@@ -38,8 +38,10 @@
 				"module/canvas",
 				"module/sprite",
 				"module/mathext",
+				"module/map",
 				// options in object form
-				"options/gameopts"
+				"options/gameopts",
+				"options/tileopts"
 			], 
 			importComplete 
 		);
