@@ -53,12 +53,62 @@ var AssetManager = new function(){
 
                         var group = assetInstance.class,
                             name = assetInstance.name,
-                            assets = AssetDict[ group ][ name ].assets;
+                            list = AssetDict[ group ][ name ].assets;
 
                         importAssets( 
-                                assets, 
+                                list, 
                                 progressCallback,
                                 completeCallback );
+
+                },
+
+                importFromGroup: function( assetGroup, progressCallback, completeCallback )
+                {
+
+                        var progress,
+                            total = 0,
+                            initiated = [];
+
+
+                        Array.prototype.slice( assetGroup ).forEach(
+                                function( asset )
+                                {
+
+                                        this.importFrom( asset, checkProgress, completeCallback )
+
+                                }.bind( this ) );
+
+
+                        function checkProgress( texture, e ){
+
+                                progress = 0;
+
+                                if( initiated.contains( texture ) )
+                                {
+                                        texture.loaded = e.loaded || 0;
+                                }
+                                else
+                                {
+                                        initiated.push( texture );
+                                        total += e.total || 0;
+                                }
+
+                                if( total )
+                                {       
+                                        progress = 0;
+
+                                        initiated.forEach( 
+                                                function( item )
+                                                {
+
+                                                        progress += item.loaded;
+
+                                                } );
+                                }
+
+                                progressCallback( progress, total );
+
+                        }
 
                 }
 
@@ -71,13 +121,15 @@ function Texture( sourceUrl )
 {
 
         // reference to the texture's image
-        var img = null;
+        var img = null,
+            source = "";
 
 
         this.__proto__ = {
 
                 // getters
                 get img() { return img; },
+                get source() { return source; },
 
                 // constructor reference
                 constructor: Texture,
@@ -114,14 +166,10 @@ function Texture( sourceUrl )
                                 if( e.lengthComputable )
                                 {
 
-                                        // cache total size and progress variables
-                                        imgSize = imgSize || e.total;
-                                        progress = e.loaded / imgSize;
-
                                         // callback trigger with progress arguments
-                                        ( progressCallback || function(){} )( 
-                                                e.total, 
-                                                e.loaded / e.total );
+                                        ( progressCallback || function(){} )(
+                                                this, 
+                                                e );
                                
                                 }
                                 else
@@ -131,7 +179,7 @@ function Texture( sourceUrl )
 
                                         // report back with unknown progress
                                         ( progressCallback || function(){} )( 
-                                                null, 
+                                                this,
                                                 null );
                               
                                 }
