@@ -4,9 +4,11 @@
   *
   * -----------------------
   *
-  * The map module stores information defining a connection of Room objects
-  * meshed together to comprise a larger explorable area.
-  * Maps can have multiple Levels which denote separate areas within a map
+  * Manages loading assets from classes of objects which maintain properties
+  * defining that objects 'class' and 'name'. References a global asset
+  * dictionary definition to pull corresponding asset URLs and loads them asyncrhonously.
+  * Supports progress and completion callbacks
+  * Supports importing assets for a single object or an array of objects
   *
   * -----------------------
   *
