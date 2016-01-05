@@ -14,18 +14,27 @@
 
 var AssetDict = {
 
-        sprites: 
+        sprite: 
         {
-                hero:
+        	baseUrl: "assets/images/sprites/",
+                mech:
                 {
                         assets:
                         [
-                                ""
+                                "mech_pixel_sketch.png",
+                                "mech_pixel_sketch2.png"
                         ]
+                },
+                imp:
+                {
+                	assets:
+                	[
+                		"midboss_cleanup_zoom.png"
+                	]
                 }
         },
 
-        textures: 
+        texture: 
         {
                 dungeon1: 
                 {
@@ -37,7 +46,7 @@ var AssetDict = {
                 }
         },
 
-        items: 
+        item: 
         {
 
         },

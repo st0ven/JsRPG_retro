@@ -21,7 +21,8 @@
 				paths: 
 				{
 					modules: "module",
-					options: "options"
+					options: "options",
+					dictionary: "dict"
 				}
 
 			} 
@@ -39,10 +40,12 @@
 				"module/sprite",
 				"module/mathext",
 				"module/map",
+				"module/loader",
 				// options in object form
 				"options/gameopts",
 				"options/tileopts",
-				"options/textures"
+				// dictionaries
+				"dictionary/assets"
 			], 
 			importComplete 
 		);
@@ -81,6 +84,27 @@
 			GAME_OPTIONS.window.height );
 
 		RPG.loop.begin(); 
+
+
+		AssetManager.importFromGroup(
+			[
+				{
+					class: "sprite",
+					name: "mech"
+				},
+				{
+					class: "sprite",
+					name: "imp"
+				}
+			],
+			function( progress, total )
+			{
+				console.log( total );
+			},
+			function( collection, e )
+			{
+				console.log( e );
+			} );
 
 	}
 

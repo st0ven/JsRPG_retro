@@ -1,3 +1,22 @@
+/**
+  *
+  * Asset management module
+  *
+  * -----------------------
+  *
+  * The map module stores information defining a connection of Room objects
+  * meshed together to comprise a larger explorable area.
+  * Maps can have multiple Levels which denote separate areas within a map
+  *
+  * -----------------------
+  *
+  * JsRPG - 2016
+  *
+  * -----------------------
+  * 
+  * Dependencies:
+  *     Utils.js
+  */
 var AssetManager = new function(){
 
 
@@ -30,13 +49,13 @@ var AssetManager = new function(){
 
                 // increments load count and triggers import callback upon
                 // successful load of all textures in the list
-                function loadSuccess()
+                function loadSuccess( e, evt )
                 {
 
                         if( ++loadCount >= assetList.length )
                         {
 
-                                ( callback || function(){} ).call( this, collection );
+                                ( callback || function(){} ).call( this, collection, e, evt );
 
                         }
 
@@ -48,17 +67,27 @@ var AssetManager = new function(){
         this.__proto__ = {
 
                 // set constructor
-                constructor: AssetLoader,
+                constructor: AssetManager,
 
                 // import image assets for a specific object instance
                 // trigger optional callbacks to report status and completion
                 importFrom: function( instance, progressCallback, completeCallback )
                 {
 
+                        // get key names for AssetDict lookup
                         var group = instance.class,
                             name = instance.name,
-                            list = AssetDict[ group ][ name ].assets;
+                            list = AssetDict[ group ][ name ].assets.slice();
 
+
+                        // modify urls to include class's base location from root
+                        list.forEach( 
+                                function( string, index ){
+                                        list[ index ] = AssetDict[ group ].baseUrl.concat( string )
+                                } );
+
+
+                        // trigger asset import function with optional callbacks
                         importAssets( 
                                 list, 
                                 progressCallback,
@@ -78,7 +107,7 @@ var AssetManager = new function(){
 
 
                         // assure assetGroup is an array, iterate through it
-                        Array.prototype.slice( group ).forEach(
+                        Array.prototype.slice.call( group ).forEach(
                                 function( asset )
                                 {
 
@@ -95,18 +124,15 @@ var AssetManager = new function(){
                                 // reset progress to zero for the summation pass
                                 progress = 0;
 
-                                // set the textures load point if this texture has already reported once
-                                if( initiated.contains( texture ) )
-                                {
-                                        texture.loaded = e.loaded || 0;
-                                }
-
                                 // this is the first report, add texture to initiated array and increment total size
-                                else
+                                if( !initiated.indexOf( texture ) >= 0 )
                                 {
                                         initiated.push( texture );
                                         total += e.total || 0;
                                 }
+
+                                // set the textures load point if this texture has already reported once
+                                texture.loaded = e.loaded || 0;
 
                                 // if a total is reported, calculations are computable
                                 if( total )
@@ -124,7 +150,7 @@ var AssetManager = new function(){
                                 }
 
                                 // trigger progress callback
-                                progressCallback( progress, total );
+                                progressCallback( progress, total, e );
 
                         }
 
@@ -161,24 +187,42 @@ function Texture( sourceUrl )
                 load: function( sourceUrl, progressCallback, completeCallback )
                 {
 
-                        // create new image instance
-                        img = new Image();
-                        
-
-                        // add progress event listener
-                        img.addEventListener(
-                                "progress",
-                                reportProgress.bind( this ) );
-
-
-                        // add load complete event listener
-                        img.addEventListener( 
-                                "load", 
-                                callback.bind( this ) );
+                        // create new load request for the sourceUrl binary data
+                        // include some options parameters with responseType and handlers
+                        Utils.asyncLoad(
+                                sourceUrl,
+                                {
+                                        responseType: "blob",
+                                        onprogress: reportProgress.bind( this ),
+                                        onreadystatechange: handleStateChange.bind( this )
+                                } );
 
 
-                        // set a reference to the source url to begin the asset load
-                        img.src = sourceUrl;
+                        // handle readystatechange event from the async load request
+                        function handleStateChange( e )
+                        { 
+
+                                // reference the original event target
+                                var xhr = e.target;
+
+                                // if our readystate has completed
+                                if( xhr.readyState === 4 ){
+
+                                        // convert our blob response to an image
+                                        Utils.convertBlobToImage(
+                                                xhr.response,
+                                                function( image, evt )
+                                                {
+
+                                                        img = image;
+                                                
+                                                        complete.call( this, e, evt );
+
+                                                }.bind( this ) );
+
+                                }
+
+                        }
 
 
                         // updates the progress and triggers a progressCallback to handle additional tasks
@@ -210,10 +254,10 @@ function Texture( sourceUrl )
 
 
                         // called when the load is complete, triggers a completion callback
-                        function complete()
+                        function complete( xhrEvent, filereaderEvent )
                         {
 
-                                completeCallback.call( this );
+                                completeCallback.call( this, xhrEvent, filereaderEvent );
 
                         }
 
