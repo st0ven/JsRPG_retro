@@ -44,15 +44,19 @@ var AssetManager = new function(){
 
         }
 
+        // prototype methods and properties
         this.__proto__ = {
 
+                // set constructor
                 constructor: AssetLoader,
 
-                importFrom: function( assetInstance, progressCallback, completeCallback )
+                // import image assets for a specific object instance
+                // trigger optional callbacks to report status and completion
+                importFrom: function( instance, progressCallback, completeCallback )
                 {
 
-                        var group = assetInstance.class,
-                            name = assetInstance.name,
+                        var group = instance.class,
+                            name = instance.name,
                             list = AssetDict[ group ][ name ].assets;
 
                         importAssets( 
@@ -62,41 +66,53 @@ var AssetManager = new function(){
 
                 },
 
-                importFromGroup: function( assetGroup, progressCallback, completeCallback )
+                // import image assets for a group of object instances
+                // trigger optional callbacks to report status and completion
+                importFromGroup: function( group, progressCallback, completeCallback )
                 {
 
+                        // progress references
                         var progress,
                             total = 0,
                             initiated = [];
 
 
-                        Array.prototype.slice( assetGroup ).forEach(
+                        // assure assetGroup is an array, iterate through it
+                        Array.prototype.slice( group ).forEach(
                                 function( asset )
                                 {
 
+                                        // import from assets individually
                                         this.importFrom( asset, checkProgress, completeCallback )
 
                                 }.bind( this ) );
 
 
+                        // use a unique progressCallback method to check the groups progress
+                        // which requires knowing the status of progression of all items in the group.
                         function checkProgress( texture, e ){
 
+                                // reset progress to zero for the summation pass
                                 progress = 0;
 
+                                // set the textures load point if this texture has already reported once
                                 if( initiated.contains( texture ) )
                                 {
                                         texture.loaded = e.loaded || 0;
                                 }
+
+                                // this is the first report, add texture to initiated array and increment total size
                                 else
                                 {
                                         initiated.push( texture );
                                         total += e.total || 0;
                                 }
 
+                                // if a total is reported, calculations are computable
                                 if( total )
                                 {       
-                                        progress = 0;
 
+                                        // iterate through each initiated item and sum the progress
                                         initiated.forEach( 
                                                 function( item )
                                                 {
@@ -104,8 +120,10 @@ var AssetManager = new function(){
                                                         progress += item.loaded;
 
                                                 } );
+
                                 }
 
+                                // trigger progress callback
                                 progressCallback( progress, total );
 
                         }
@@ -117,6 +135,10 @@ var AssetManager = new function(){
 };
 
 
+
+// Texture object 
+// stores an image instance within the texture
+// prototype provides interface to interact with texture 
 function Texture( sourceUrl )
 {
 
