@@ -1,13 +1,16 @@
-function Animation()
+function Animation( data )
 {
 
 	// strict mode module
 	"use strict"
 
-	var frames = [],
-	    frameSpeeds = [],
-	    duration = 0,
-	    reverse = false;
+
+	var 
+	frames = [],
+	frameSpeeds = [],
+	duration = 0,
+	reverse = false;
+
 
 	this.__proto__ = {
 
@@ -18,3 +21,30 @@ function Animation()
 	};
 
 }
+
+
+var testAnimationData = {
+
+	name: "testanim1",
+	duration: 800,
+	frames:
+	[
+		{
+			asset: "",
+			duration: 200
+		},
+		{
+			asset: "",
+			duration: 100
+		},
+		{
+			asset: "",
+			duration: 300
+		},
+		{
+			asset: "",
+			duration: 200
+		}
+	]
+
+};

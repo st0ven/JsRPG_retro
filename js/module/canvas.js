@@ -7,13 +7,13 @@
 function Canvas( el, width, height )
 {
 
-
 	// object private variables
-	var canvas,
-	    context,
-	    pixelRatio,
-	    defaultWidth = 480,
-	    defaultHeight = 320;
+	var 
+	canvas,
+	context,
+	pixelRatio,
+	defaultWidth = 480,
+	defaultHeight = 320;
 
 
 	// prototype methods
@@ -52,6 +52,20 @@ function Canvas( el, width, height )
 
 		},
 
+		renderFPS: function( value )
+		{
+
+			this.context.fillStyle = "black";
+
+			this.context.font = 10 * pixelRatio + "px sans-serif";
+			
+			this.context.fillText( 
+				"fps: " + value, 
+				5 * pixelRatio, 
+				15 * pixelRatio );
+
+		},
+
 		screenCapture: function()
 		{
 
@@ -77,6 +91,8 @@ function Canvas( el, width, height )
 
 	// link the canvas/context vars
 	this.setCanvasEl( el );
+
+
 	// set the new canvas size 
 	this.resize( width, height );
 

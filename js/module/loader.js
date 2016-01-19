@@ -26,23 +26,33 @@ var AssetManager = new function(){
         // triggers a callback supplied as an optional argument
         // upon load success of all textures
         // TODO: build in a timeout feature
-        function importAssets( assetList, progressReport, callback )
+        function importAssets( instance, progressReport, callback )
         {
 
                 var collection = [],
                     loadCount = 0,
                     maxWait = 30000,
-                    startTime = Date.now();
+                    startTime = Date.now(),
+                    asset = AssetDict[ instance.class ],
+                    assetList = asset[ instance.name ].assets;
 
                 // iterate through assetList
-                ( assetList || [] ).forEach( 
-                        function( sourceUrl )
+                Object.keys( assetList || {} ).forEach( 
+                        function( key )
                         {
 
+                                var 
+                                filename = assetList[ key ],
+                                sourceUrl = asset.baseUrl + filename,
+
                                 // push new texture instance to the collection
-                                var newTexture = collection[ 
+                                newTexture = collection[ 
                                         collection.push( 
                                                 new Texture() ) - 1 ];
+
+                                newTexture.name = key;
+
+                                newTexture.group = instance.name;
 
                                 // load the texture from item's source url
                                 newTexture.load( sourceUrl, progressReport, loadSuccess );
@@ -54,7 +64,7 @@ var AssetManager = new function(){
                 function loadSuccess( e, evt )
                 {
 
-                        if( ++loadCount >= assetList.length )
+                        if( ++loadCount >= Object.keys( assetList ).length )
                         {
 
                                 ( callback || function(){} ).call( this, collection, e, evt );
@@ -77,7 +87,7 @@ var AssetManager = new function(){
                 {
 
                         // get key names for AssetDict lookup
-                        var group = instance.class,
+                      /*  var group = instance.class,
                             name = instance.name,
                             list = AssetDict[ group ][ name ].assets.slice();
 
@@ -87,11 +97,11 @@ var AssetManager = new function(){
                                 function( string, index ){
                                         list[ index ] = AssetDict[ group ].baseUrl.concat( string )
                                 } );
-
+                         */
 
                         // trigger asset import function with optional callbacks
                         importAssets( 
-                                list, 
+                                instance,
                                 progressCallback,
                                 completeCallback );
 
@@ -152,7 +162,7 @@ var AssetManager = new function(){
                                 }
 
                                 // trigger progress callback
-                                progressCallback( progress, total, e );
+                                ( progressCallback || function(){} )( progress, total, e );
 
                         }
 

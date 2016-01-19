@@ -16,8 +16,8 @@ var TILE_OPTIONS = {
 
 	dimensions: {
 
-		width: 16,
-		height: 16
+		width: 64,
+		height: 64
 
 	},
 

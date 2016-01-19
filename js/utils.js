@@ -69,7 +69,7 @@ var Utils = {
 
 	// copies the properties of one object to another
 	// returns a reference to the updated object
-	mixin: function( toObj, fromObj )
+	mixin: function( toObj, fromObj, deepCopy )
 	{
 
 		Object.getOwnPropertyNames( fromObj ).forEach( 
@@ -78,7 +78,17 @@ var Utils = {
 
 				toObj[ property ] = fromObj[ property ];
 
+				if( deepCopy )
+				{
+
+					toObj[ property ] = this.mixin( 
+						toObj[ property ], 
+						fromObj[ property ] );
+
+				}
+
 			}.bind( this ) );
+
 
 		return toObj;
 

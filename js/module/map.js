@@ -14,32 +14,152 @@
   *
   */
 
-function Map()
+function Map( )
 {
 
+	var
+	levels = [],
+	tilesets = [];
 
+
+	this.__proto__ = {
+
+		load: function( mapName )
+		{
+
+			var 
+			assetCollection = [],
+			data = MapDict[ mapName ];
+
+
+			// is our mapName a valid definition in dictionary?
+			try
+			{
+
+				_importAssets(
+					function( textureArray )
+					{
+
+						textureArray.forEach(
+							function( texture )
+							{
+								var tileset = new Tileset();
+								    tileset.populate( texture );
+
+								tilesets.push( tileset );
+
+							} );
+
+						data.levels.forEach( 
+							function( levelData )
+							{
+
+								levels.push( new Level( levelData ) );
+
+							}.bind( this ) ); console.log( tilesets );
+
+					}.bind( this ) );
+
+			}
+			// error thrown: likely invalid map reference
+			catch( e )
+			{
+
+				console.log( "Map load error: " + e );
+
+			}
+
+
+			// import function
+			// collects all sprite and texture aliases and
+			// uses AssetManager to import the combined collection of
+			// asset names based on the type of asset
+			function _importAssets( callback )
+			{
+
+				// collect textures into asset collection
+				data.textures.forEach(
+					function( assetName )
+					{
+
+						assetCollection.push( { class: "texture", name: assetName } );
+
+					} );
+
+				// load sprites into asset collection
+				data.sprites.forEach(
+					function( assetName )
+					{
+
+						assetCollection.push( { class: "sprite", name: assetName } );
+
+					} );
+
+				// load the group of assets
+				AssetManager.importFromGroup( 
+					assetCollection, 
+					null, 
+					callback );
+
+			}
+
+		},
+
+	};
 
 }
 
 
-function Room()
+function Level( data )
 {
 
-	var tileData = [];
+	// 2d array?
+	var 
+	areas = [],
+	dimensions = {};
 
-	this.dimensions = {
 
-		width: MathExt.randomBetween( [ 6, 20 ] ),
-		height: MathExt.randomBetween( [ 4, 12 ])
+	Object.keys( data ).forEach( 
+		function( key )
+		{
+			var area = new Area( data[ key ] );
+			    area.name = key;
 
-	};
+			areas.push( area );
+
+		}.bind( this ) );
+
 
 	this.__proto__ = {
 
-		constructor: Room,
+		get areas() { return areas; }
+
+	}
+
+}
+
+
+function Area( data )
+{
+
+	var 
+	entities = data.entities,
+	layers = data.layers;
+	
+
+	this.__proto__ = {
+
+		get layers() { return layers; },
 
 		generate: function()
 		{
+
+		},
+
+		load: function( name )
+		{
+
+
 
 		}
 
@@ -48,67 +168,79 @@ function Room()
 }
 
 
-function Tile( type ){
 
-	var img = null;
 
-	this.flags = {};
+function Tileset()
+{
 
-	this.properties = {
+	this.name;
 
-		color: 'black'
+	this.texture = null;
 
-	};
-
-	this.type = "";
+	this.tiles = [];
 
 	this.__proto__ = {
 
-		constructor: Tile,
+		populate: function( texture )
+		{
 
-		create: function( type, callback ){
+			var 
+			// determine dimensions and index calculations
+			tilewidth = Tile.prototype.dimensions.width,
+			tileheight = Tile.prototype.dimensions.height,
+			texturewidth = texture.img.width,
+			textureheight = texture.img.height,
+			cols = Math.floor( texturewidth / tilewidth ),
+			rows = Math.floor( textureheight/ tileheight );
 
-			// reference to tile options
-			var options = TILE_OPTIONS.types[ type ];
+			// store reference to the texture;
+			this.texture = texture;
 
-			// set tile properties
-			this.type = type;
-			this.flags.visible = true;
-			this.flags.collide = options.flags.collide;
-			this.properties.color = options.color;
+			// reference to texture name
+			this.name = texture.name;
 
-			// create our binary data for the image associated with this tile
-			img = new Image();
-			img.width = this.dimensions.width;
-			img.height = this.dimensions.height;
-
-			// branch depending on whether an src is explicitly defined
-			// note this should change to a much more complex scheme later
-			// where tilesets are pre-loaded and chunks of those tilesets are cached and
-			// utilized as tile image data
-			if( options.src )
+			// iterate through columns
+			for( var i = 0; i < rows; i ++ )
 			{
-				img.addEventListener( 
-					"load", 
-					( callback || function(){} ).bind( this ) );
 
-				img.src = options.src;
-			}
-			else
-			{
-				img.style.backgroundColor = this.properties.color;
-				( callback || function(){} ).call( this );
+				// iterate through rows
+				for( var j = 0; j < cols; j++ )
+				{
+
+					// create new tile instance and set properties
+					var newTile = new Tile();
+
+					newTile.row = i;
+
+					newTile.col = j;
+
+					newTile.index = i * cols + j;
+
+					// add tile instance to the tile collection
+					this.tiles.push( newTile );
+
+				}
+
 			}
 
 		},
 
-		dimensions: TILE_OPTIONS.dimensions
-
 	};
 
-	if( type )
-	{
-		this.create( type );
-	}
-
 }
+
+
+var Tile = function( type )
+{
+
+	this.flags = {};
+	this.row;
+	this.col;
+	this.index;
+
+}; 
+Tile.prototype = {
+
+	dimensions: TILE_OPTIONS.dimensions
+
+};

@@ -1,10 +1,11 @@
 var GAME_OPTIONS = {
 
+
 	window: 
 	{
 
-		width: 480,
-		height: 320
+		width: 800,
+		height: 480
 
 	}
 

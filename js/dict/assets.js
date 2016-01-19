@@ -20,29 +20,30 @@ var AssetDict = {
                 mech:
                 {
                         assets:
-                        [
-                                "mech_pixel_sketch.png",
-                                "mech_pixel_sketch2.png"
-                        ]
+                        {
+                                main:"mech_pixel_sketch.png",
+                                alt:"mech_pixel_sketch2.png"
+                        }
                 },
                 imp:
                 {
                 	assets:
-                	[
-                		"midboss_cleanup_zoom.png"
-                	]
+                	{
+                		main:"midboss_cleanup_zoom.png"
+                	}
                 }
         },
 
         texture: 
         {
+                baseUrl: "assets/images/tilesets/",
                 dungeon1: 
                 {
                         assets: 
-                        [
-                                "",
-                                ""
-                        ]
+                        {
+                                A:"test_top1.png",
+                                B:"test_column1.png"
+                        }
                 }
         },
 
