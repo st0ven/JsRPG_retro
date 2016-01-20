@@ -56,7 +56,7 @@ function Game()
 
 				get fps()
 				{
-					return Math.round( 1 / ( tick / 1000 ) );
+					return Math.round( 1 / ( ( tick || 10 ) / 1000 ) );
 				},
 
 				// update the tick and last frame calculations
@@ -98,6 +98,7 @@ function Game()
 					if( t() < 1 )
 					{
 						( loopCallback || function(){} ).call( this, t() );
+
 						raf( timeloop );
 					}
 					else
@@ -120,7 +121,7 @@ function Game()
 
 		}
 
-	}
+	};
 
 
 	var gameLoop = new function()
@@ -138,7 +139,7 @@ function Game()
 			logicLoop,
 			10 );
 
-
+		renderLoop();
 		// logic loop
 		function logicLoop()
 		{
@@ -149,9 +150,7 @@ function Game()
 
 				game.clock.cycles.update();
 
-				// continue loop
-				raf( renderLoop.bind( game ) );
-
+				
 			}
 			// end game - cease all logic loops
 			else
@@ -174,24 +173,35 @@ function Game()
 			// clear the canvas
 			game.canvas.clear();
 
+			// 
+			renderStack( game.canvas.context )
+
 			// delay fps value update
 			Debug.render.fps.cycle( 
 				fpsdelay,
 				function()
 				{
-					fps = game.clock.cycles.fps;
+					fps = game.clock.frames.fps;
 				} );
 
 			// render fps
 			game.canvas.renderFPS( fps );
 
+			// continue loop
+			raf( renderLoop.bind( game ) );
+
+
 		}
 
 
-		function renderStack()
+		function renderStack( context )
 		{
 
-			//game.maps.current
+			if( game.maps && game.maps.current ){
+ 
+				context.drawImage( game.maps.current.stage.canvas, 0, 0 );
+
+			}
 
 		}
 
@@ -221,7 +231,9 @@ function Game()
 
 		this.__proto__ = {
 
-			set: function( name )
+			get current() { return current; },
+
+			load: function( name, callback )
 			{
 
 				if( current )
@@ -242,7 +254,11 @@ function Game()
 
 					current = new Map();
 
-					current.load( name );
+					current.load( 
+						name, 
+						callback.bind(
+							game,
+							current ) );
 
 				}
 

@@ -26,42 +26,54 @@ var AssetManager = new function(){
         // triggers a callback supplied as an optional argument
         // upon load success of all textures
         // TODO: build in a timeout feature
-        function importAssets( instance, progressReport, callback )
+        function importAssets( lookup, progressReport, callback )
         {
 
-                var collection = [],
-                    loadCount = 0,
-                    maxWait = 30000,
-                    startTime = Date.now(),
-                    asset = AssetDict[ instance.class ],
-                    assetList = asset[ instance.name ].assets;
+                var 
+                collection = [],
+                loadCount = 0,
+                maxWait = 30000,
+                startTime = Date.now(),
+                assetClass = AssetDict[ lookup.class ],
+                assetList = assetClass[ lookup.name ].assets;
+
 
                 // iterate through assetList
-                Object.keys( assetList || {} ).forEach( 
-                        function( key )
-                        {
+                Object.keys( assetList || {} ).forEach( _createTexture );
+                
 
-                                var 
-                                filename = assetList[ key ],
-                                sourceUrl = asset.baseUrl + filename,
+                // uses asset list key to create a new texture
+                // adds texture to a texture collection
+                // sets some properties to texture and triggers load method
+                function _createTexture( key )
+                {
 
-                                // push new texture instance to the collection
-                                newTexture = collection[ 
-                                        collection.push( 
-                                                new Texture() ) - 1 ];
+                         // get full relative url to asset source url
+                        var sourceUrl = assetClass.baseUrl + assetList[ key ],
 
-                                newTexture.name = key;
+                        // push new texture instance to the collection
+                        newTexture = collection[ 
+                                collection.push( 
+                                        new Texture() ) - 1 ];
 
-                                newTexture.group = instance.name;
+                        // set texture name
+                        newTexture.id = key;
 
-                                // load the texture from item's source url
-                                newTexture.load( sourceUrl, progressReport, loadSuccess );
+                        // set texture group to reflect asset group
+                        newTexture.group = lookup.name;
 
-                        } );
+                        // set the asset classType to the texture
+                        newTexture.class = lookup.class;
+
+                        // load the texture from item's source url
+                        newTexture.load( sourceUrl, progressReport, _loadSuccess );
+
+                }
+
 
                 // increments load count and triggers import callback upon
                 // successful load of all textures in the list
-                function loadSuccess( e, evt )
+                function _loadSuccess( e, evt )
                 {
 
                         if( ++loadCount >= Object.keys( assetList ).length )
@@ -81,60 +93,51 @@ var AssetManager = new function(){
                 // set constructor
                 constructor: AssetManager,
 
-                // import image assets for a specific object instance
-                // trigger optional callbacks to report status and completion
-                importFrom: function( instance, progressCallback, completeCallback )
-                {
-
-                        // get key names for AssetDict lookup
-                      /*  var group = instance.class,
-                            name = instance.name,
-                            list = AssetDict[ group ][ name ].assets.slice();
-
-
-                        // modify urls to include class's base location from root
-                        list.forEach( 
-                                function( string, index ){
-                                        list[ index ] = AssetDict[ group ].baseUrl.concat( string )
-                                } );
-                         */
-
-                        // trigger asset import function with optional callbacks
-                        importAssets( 
-                                instance,
-                                progressCallback,
-                                completeCallback );
-
-                },
 
                 // import image assets for a group of object instances
                 // trigger optional callbacks to report status and completion
-                importFromGroup: function( group, progressCallback, completeCallback )
+                import: function( group, progressCallback, completeCallback )
                 {
 
                         // progress references
-                        var progress,
-                            total = 0,
-                            initiated = [];
+                        var 
+                        progress,
+                        total = 0,
+                        assetCount = 0,
+                        completed = 0,
+                        initiated = [],
+                        textures = [];
+
+
+                        // normalize group to be of type array
+                        group = group instanceof Array ?
+                                group:
+                                [ group ];
 
 
                         // assure assetGroup is an array, iterate through it
-                        Array.prototype.slice.call( group ).forEach(
-                                function( asset )
+                        group.forEach(
+                                function( assetDetails )
                                 {
+                                        // increment asset counter
+                                        assetCount++;
 
                                         // import from assets individually
-                                        this.importFrom( asset, checkProgress, completeCallback )
+                                        importAssets( 
+                                                assetDetails,
+                                                _checkProgress,
+                                                _checkComplete );
 
                                 }.bind( this ) );
 
 
                         // use a unique progressCallback method to check the groups progress
                         // which requires knowing the status of progression of all items in the group.
-                        function checkProgress( texture, e ){
+                        function _checkProgress( texture, e ){
 
                                 // reset progress to zero for the summation pass
                                 progress = 0;
+
 
                                 // this is the first report, add texture to initiated array and increment total size
                                 if( !initiated.indexOf( texture ) >= 0 )
@@ -143,8 +146,10 @@ var AssetManager = new function(){
                                         total += e.total || 0;
                                 }
 
+
                                 // set the textures load point if this texture has already reported once
                                 texture.loaded = e.loaded || 0;
+
 
                                 // if a total is reported, calculations are computable
                                 if( total )
@@ -161,8 +166,34 @@ var AssetManager = new function(){
 
                                 }
 
+
                                 // trigger progress callback
-                                ( progressCallback || function(){} )( progress, total, e );
+                                ( progressCallback || function(){} )( 
+                                        progress, 
+                                        total, 
+                                        e );
+
+                        }
+
+
+                        // checks to see if all asset definitions within the group have been loaded
+                        // triggers the completeCallback method to further handle the resulting texture collection
+                        function _checkComplete( collection, e, evt )
+                        { 
+
+                                // append resulting texture collection
+                                textures = Array.prototype.concat.call( 
+                                        textures, 
+                                        collection );
+
+
+                                // test if all asset definitions are accounted for
+                                if( ++completed >= assetCount )
+                                {
+
+                                        ( completeCallback || function(){} ).call( this, textures, e, evt );
+
+                                }
 
                         }
 
@@ -180,11 +211,13 @@ var AssetManager = new function(){
 function Texture( sourceUrl )
 {
 
-        // reference to the texture's image
-        var img = null,
-            source = "";
+        // private variables
+        var 
+        img = null,
+        source = "";
 
 
+        // define prototype
         this.__proto__ = {
 
                 // getters
@@ -220,17 +253,28 @@ function Texture( sourceUrl )
                                 // if our readystate has completed
                                 if( xhr.readyState === 4 ){
 
-                                        // convert our blob response to an image
-                                        Utils.convertBlobToImage(
-                                                xhr.response,
-                                                function( image, evt )
-                                                {
+                                        // only proceed if there was a response
+                                        if( xhr.response )
+                                        {
 
-                                                        img = image;
-                                                
-                                                        complete.call( this, e, evt );
+                                                // convert our blob response to an image
+                                                Utils.convertBlobToImage(
+                                                        xhr.response,
+                                                        function( image, evt )
+                                                        {
 
-                                                }.bind( this ) );
+                                                                if( image )
+                                                                {
+
+                                                                        img = image;
+                                                                
+                                                                        complete.call( this, e, evt );
+
+                                                                }
+
+                                                        }.bind( this ) );
+
+                                        }
 
                                 }
 
@@ -241,27 +285,19 @@ function Texture( sourceUrl )
                         function reportProgress( e )
                         {
 
-                                if( e.lengthComputable )
-                                {
+                                // remove listener if there is no computable length
+                                if( !e.lengthComputable &&
+                                    img ){
 
-                                        // callback trigger with progress arguments
-                                        ( progressCallback || function(){} )(
-                                                this, 
-                                                e );
+                                       img.removeEventListener( "progress" );
                                
                                 }
-                                else
-                                {
-                                        // progress is not reportable, remove the listener
-                                        img.removeEventListener( "progress" );
 
-                                        // report back with unknown progress
-                                        ( progressCallback || function(){} )( 
-                                                this,
-                                                null );
+                                // report back with unknown progress
+                                ( progressCallback || function(){} )( 
+                                        this,
+                                        e );
                               
-                                }
-
                         }
 
 
@@ -269,7 +305,10 @@ function Texture( sourceUrl )
                         function complete( xhrEvent, filereaderEvent )
                         {
 
-                                completeCallback.call( this, xhrEvent, filereaderEvent );
+                                completeCallback.call( 
+                                        this, 
+                                        xhrEvent, 
+                                        filereaderEvent );
 
                         }
 

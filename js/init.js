@@ -86,27 +86,14 @@
 			GAME_OPTIONS.window.height );
 
 
-		RPG.maps.set( "testMap" );
+		RPG.maps.load( 
+			"testMap",
+			function _mapReady( map )
+			{
 
-		/*AssetManager.importFromGroup(
-			[
-				{
-					class: "sprite",
-					name: "mech"
-				},
-				{
-					class: "sprite",
-					name: "imp"
-				}
-			],
-			function( progress, total )
-			{
-				console.log( total );
-			},
-			function( collection, e )
-			{
-				console.log( e );
-			} );*/
+				map.areas.set( "testRoom" );
+
+			} );
 
 	}
 

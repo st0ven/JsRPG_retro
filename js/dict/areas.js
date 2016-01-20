@@ -3,14 +3,26 @@ var MapDict = {
 	testMap:
 	{
 
-		sprites:
-		[
+		assets:
+		{
 
-		],
-		textures:
-		[
-			"dungeon1"
-		],
+			sprite:
+			[
+
+			],
+
+			texture:
+			[
+				"dungeon1"
+			],
+
+			terrain:
+			[
+				"nature1"
+			]
+
+		},
+
 		levels:
 		[
 
@@ -19,6 +31,11 @@ var MapDict = {
 				testRoom:
 				{
 					
+					aliases:
+					{
+						A: "nature1"
+					},
+					backdrop: "#003721",
 					entities: 
 					[
 
@@ -28,13 +45,16 @@ var MapDict = {
 
 						{
 
+							cols: 4,
+							rows: 4,
 							tiles:
 							[
 
-								[ "A,1,2", "A,1,2", "A,1,2", "A,1,2" ],
-								[ "A,1,2", "A,1,2", "A,1,2", "A,1,2" ],
-								[ "A,1,2", "A,1,1", "A,1,2", "A,1,2" ],
-								[ "A,1,1", "A,1,1", "", "" ]
+								Array.prototype.concat(
+									"A:0,2", "A:3,2", "A:1,2", "A:1,2",
+									"A:1,2", "A:2,2", "A:2,2", "A:1,2",
+									"A:4,2", "A:4,1", "A:1,2", "A:6,2",
+									"A:4,1", "A:5,1", "", "")
 
 							],
 							objects:

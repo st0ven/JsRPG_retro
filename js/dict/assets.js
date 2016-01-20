@@ -36,7 +36,8 @@ var AssetDict = {
 
         texture: 
         {
-                baseUrl: "assets/images/tilesets/",
+                baseUrl: "assets/images/textures/",
+
                 dungeon1: 
                 {
                         assets: 
@@ -45,6 +46,21 @@ var AssetDict = {
                                 B:"test_column1.png"
                         }
                 }
+
+        },
+
+        terrain:
+        {
+                baseUrl: "assets/images/terrain/",
+
+                nature1:
+                {
+                        assets:
+                        {
+                                grass:"nature1.png"
+                        }
+                }
+
         },
 
         item: 

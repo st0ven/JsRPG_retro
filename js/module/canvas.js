@@ -20,6 +20,7 @@ function Canvas( el, width, height )
 	this.__proto__ = {
 
 		get el() { return canvas; },
+		get canvas() { return canvas; },
 		get context() { return context; },
 		get pixelRatio() { return pixelRatio; },
 
