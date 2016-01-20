@@ -76,16 +76,24 @@
 		// new game instance
 		var RPG = new Game();
 
+
 		// set game canvas element reference to our main canvas on page
 		RPG.canvas.setCanvasEl( 
 			document.querySelector( "canvas" ) );
 
+
 		// set the canvas size according to our game window options
 		RPG.canvas.resize( 
 			GAME_OPTIONS.window.width, 
-			GAME_OPTIONS.window.height );
+			GAME_OPTIONS.window.height,
+			GAME_OPTIONS.zoom );
 
 
+		// do not smooth scaling
+		RPG.canvas.smooth( false );
+
+
+		// load a map
 		RPG.maps.load( 
 			"testMap",
 			function _mapReady( map )

@@ -134,12 +134,15 @@ function Game()
 		fpsdelay = 300,
 		// boolean pause flag 
 		pause = false,
+		// zoom factor to render
+		scale = GAME_OPTIONS.zoom * game.canvas.pixelRatio,
 		// set timeout for logic loop
 		logicTimeout = setInterval(
 			logicLoop,
 			10 );
-
+		// begin rendering loop
 		renderLoop();
+
 		// logic loop
 		function logicLoop()
 		{
@@ -197,11 +200,19 @@ function Game()
 		function renderStack( context )
 		{
 
+			context.save();
+
+			context.scale( 
+			 	scale,
+			 	scale );
+
 			if( game.maps && game.maps.current ){
  
-				context.drawImage( game.maps.current.stage.canvas, 0, 0 );
+				context.drawImage( game.maps.current.stage.el, 0, 0 );
 
 			}
+
+			context.restore();
 
 		}
 

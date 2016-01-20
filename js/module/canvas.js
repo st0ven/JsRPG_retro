@@ -7,6 +7,10 @@
 function Canvas( el, width, height )
 {
 
+	// strict mode
+	"use strict";
+
+
 	// object private variables
 	var 
 	canvas,
@@ -16,11 +20,21 @@ function Canvas( el, width, height )
 	defaultHeight = 320;
 
 
+	function setSmoothing( bool )
+	{
+
+		context.imageSmoothingEnabled = bool;
+		context.webkitImageSmoothingEnabled = bool;
+		context.mozImageSmoothingEnabled = bool;
+		context.msImageSmoothingEnabled = bool;
+
+	}
+
+
 	// prototype methods
 	this.__proto__ = {
 
 		get el() { return canvas; },
-		get canvas() { return canvas; },
 		get context() { return context; },
 		get pixelRatio() { return pixelRatio; },
 
@@ -38,25 +52,26 @@ function Canvas( el, width, height )
 
 		},
 
-		resize: function( width, height )
+		resize: function( width, height, scale )
 		{
 
 			// normalize the width/height arguments to a valid value
 			width = width || defaultWidth;
 			height = height || defaultHeight;
+			scale = scale || 1;
 
 			// calculate the dimensions and styling of canvas element
-			canvas.width = width * pixelRatio;
-			canvas.height = height * pixelRatio;
-			canvas.style.width = width + "px";
-			canvas.style.height = height + "px";
+			canvas.width = width * pixelRatio * scale;
+			canvas.height = height * pixelRatio * scale;
+			canvas.style.width = width * scale + "px";
+			canvas.style.height = height * scale + "px";
 
 		},
 
 		renderFPS: function( value )
 		{
 
-			this.context.fillStyle = "black";
+			this.context.fillStyle = "white";
 
 			this.context.font = 10 * pixelRatio + "px sans-serif";
 			
@@ -85,7 +100,9 @@ function Canvas( el, width, height )
 			context = canvas.getContext( "2d" );
 			pixelRatio = window.devicePixelRatio || 1 * context.webkitBackingStorePixelRatio || 1;
 
-		}
+		},
+
+		smooth: setSmoothing
 
 	};
 
@@ -98,4 +115,4 @@ function Canvas( el, width, height )
 	this.resize( width, height );
 
 
-};
+}
