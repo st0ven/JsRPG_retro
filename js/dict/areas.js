@@ -35,11 +35,14 @@ var MapDict = {
 					{
 						A: "nature1"
 					},
+
 					backdrop: "#003721",
+
 					entities: 
 					[
 
 					],
+					
 					layers:
 					[
 

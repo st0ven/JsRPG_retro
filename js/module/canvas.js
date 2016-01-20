@@ -20,25 +20,13 @@ function Canvas( el, width, height )
 	defaultHeight = 320;
 
 
-	function setSmoothing( bool )
-	{
-
-		context.imageSmoothingEnabled = bool;
-		context.webkitImageSmoothingEnabled = bool;
-		context.mozImageSmoothingEnabled = bool;
-		context.msImageSmoothingEnabled = bool;
-
-	}
-
-
 	// prototype methods
 	this.__proto__ = {
 
+		// getters
 		get el() { return canvas; },
 		get context() { return context; },
 		get pixelRatio() { return pixelRatio; },
-
-		constructor: Canvas,
 
 		// clear the canvas entirely
 		clear: function()
@@ -52,6 +40,7 @@ function Canvas( el, width, height )
 
 		},
 
+		// resize the canvas element given optional arguments
 		resize: function( width, height, scale )
 		{
 
@@ -68,6 +57,7 @@ function Canvas( el, width, height )
 
 		},
 
+		// render the fps value on the top/left hand corner of screen
 		renderFPS: function( value )
 		{
 
@@ -93,16 +83,31 @@ function Canvas( el, width, height )
 
 		},
 
+		// target the canvas element to be a specific reference to a node
 		setCanvasEl: function( el )
 		{
 
-			canvas = el instanceof Node ? el : document.querySelector( el ) || document.createElement( "canvas" );
+			canvas = el instanceof Node ? 
+				el: 
+				document.querySelector( el ) || 
+				document.createElement( "canvas" );
+
 			context = canvas.getContext( "2d" );
+
 			pixelRatio = window.devicePixelRatio || 1 * context.webkitBackingStorePixelRatio || 1;
 
 		},
 
-		smooth: setSmoothing
+		// set context smoothing properties based on boolean value
+		smooth: function( bool )
+		{
+
+			context.imageSmoothingEnabled = bool;
+			context.webkitImageSmoothingEnabled = bool;
+			context.mozImageSmoothingEnabled = bool;
+			context.msImageSmoothingEnabled = bool;
+
+		}
 
 	};
 

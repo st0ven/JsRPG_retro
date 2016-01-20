@@ -268,7 +268,7 @@ function Map( )
 						oX = tile.col * width,
 						oY = tile.row * height,
 						dX = index % layer.cols * width,
-						dY = Math.floor( index / layer.rows ) * width;
+						dY = Math.floor( index / layer.cols ) * width; console.log( index, dX, dY );
 
 						stage.context.drawImage(
 							texture.img,
